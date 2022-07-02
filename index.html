@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="patron.png" />
+    <title>Test embauche Grand Poitiers</title>
+</head>
+<style>
+    #patron{
+        display: none; 
+        /*
+        pas besoin de le voir, juste qu'il soit accessible pr le grab avec JS
+        on aurait aussi pu faire en JS un new Image()
+        */
+    }
+</style>
+<body>
+    <canvas id="canvaToCheck">
+        votre navigateur ne supporte pas l'élément HTML Canvas
+    </canvas>
+    <code id="returnToText">
+    </code>
+
+    <img src="patron.png" id="patron"> <!-- l'image unknown était pr avoir plusieurs éléments de comparaison pr m'assurer du tri -->
+</body>
+<script>
+    //l'exercice sera réalisé avec des technologies web au sein d'un seul fichier html ;
+    const patron = document.getElementById('patron') ? document.getElementById('patron') : ""
+    //dessiner le canvas depuis l'image pour plus de simplicité
+    drawInCanva = (canvaId) =>{
+        return new Promise((resolve, reject)=>{ // à la relecture du code je réalise que la promesse n'était pas forcément nécessaire...^^'
+            if(document.getElementById(canvaId) && patron) { //on verifie que les div sont bien là
+                const canvaToCheck = document.getElementById(canvaId)
+                //on met le canva à la mm taille que l'image. Ca permettra entre autre de récupérer le  nbr de pixel
+                canvaToCheck.width = patron.width
+                canvaToCheck.height = patron.height
+                
+                let ctx = canvaToCheck.getContext("2d")
+                //on redessine l'image ds le canva
+                ctx.drawImage(patron,0,0)
+                // return true
+                resolve(true) 
+            }else{
+                // return 
+                reject({error:"Au moins une des variables n'existe pas"})
+            }
+        })
+            
+        }
+
+        //convertir rgb en hexa
+        const rgbToHexadecimal = (r, g, b) => {
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Left_shift
+            // https://www.developintelligence.com/blog/2017/02/rgb-to-hex-understanding-the-major-web-color-codes/ && https://www.pluralsight.com/blog/tutorials/understanding-hexadecimal-colors-simple
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        //obj to array
+        const objToArr = (obj, total) =>{
+            let finalArr = []
+            Object.entries(obj).forEach(([key, value]) => {
+                finalArr.push({[key]:parseInt(value)/total*100}) //on transforme en pourcentage la valeur
+            })
+
+            return finalArr.sort((a, b) => (Object.values(a) < Object.values(b) ? 1 : -1)) //comme on doit trier sur le pourcentage mais qu'on n'est pas censé connaitre la dénomination des clés j'utilise Object.values 
+        }
+
+        // fonction attendue :
+        getColorsDistributionFromCanvasId = (canvaId) =>{
+            if(document.getElementById(canvaId)){
+                let count = {} // pr compter
+                const canvaToCheck = document.getElementById(canvaId) // on récupère le canva encore. Je ne l'ai pas déclaré en variable puisque son ID devait être en paramètre de la fonction
+                const ctx = canvaToCheck.getContext('2d')
+                const imgData = ctx.getImageData(0,0,canvaToCheck.width, canvaToCheck.height)
+                const totalPixels = canvaToCheck.width * canvaToCheck.height //on recupère le nbr total de pixel de l'image
+
+                // on loop pour soit créer une nouvelle entrée soit incrémenter celle correspondante
+                for(let i = 0; i<imgData.data.length; i+=4){
+                    let color = rgbToHexadecimal(imgData.data[i], imgData.data[i+1], imgData.data[i+2])
+                    if (count[color]) {
+                        count[color] += 1
+                    } else {
+                        count[color] = 1
+                    }
+                }
+                // console.log(objToArr(count, totalPixels));
+                return objToArr(count, totalPixels)
+            }
+        }
+    // au chargement de la page
+    window.addEventListener('load', (e)=>{
+        drawInCanva('canvaToCheck')
+            .then((res)=>{
+                console.log(getColorsDistributionFromCanvasId('canvaToCheck'))
+            })
+            .catch(err=>console.log(err.error))
+    })
+</script>
+</html>
