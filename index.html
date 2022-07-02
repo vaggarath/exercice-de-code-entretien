@@ -13,27 +13,35 @@
     <canvas id="canvaToCheck">
         votre navigateur ne supporte pas l'élément HTML Canvas
     </canvas>
-    <code id="returnToText">
-    </code>
 </body>
 <script>
     //l'exercice sera réalisé avec des technologies web au sein d'un seul fichier html ;
     // const patron = document.getElementById('patron') ? document.getElementById('patron') : ""
-    const patron = new Image();
-        patron.crossOrigin = 'anonymous';
-        patron.src = '/patron.png';
+    // const patron = new Image();
+    //     patron.crossOrigin = 'anonymous';
+    //     patron.src = '/patron.png';
     //dessiner le canvas depuis l'image pour plus de simplicité
     drawInCanva = (canvaId) =>{
         return new Promise((resolve, reject)=>{ // à la relecture du code je réalise que la promesse n'était pas forcément nécessaire...^^'
-            if(document.getElementById(canvaId) && patron) { //on verifie que les div sont bien là
+            if(document.getElementById(canvaId)) { //on verifie que les div sont bien là
                 const canvaToCheck = document.getElementById(canvaId)
                 //on met le canva à la mm taille que l'image. Ca permettra entre autre de récupérer le  nbr de pixel
-                canvaToCheck.width = patron.width
-                canvaToCheck.height = patron.height
+                // canvaToCheck.width = patron.width
+                // canvaToCheck.height = patron.height
+                canvaToCheck.width = 100
+                canvaToCheck.height = 50
                 
                 let ctx = canvaToCheck.getContext("2d")
+                ctx.fillStyle = "#FF0000"
+                ctx.fillRect(0, 0, 75, 50);
+
+                ctx.fillStyle = "#000000"
+                ctx.fillRect(75, 0, 25, 50); 
+
+                // ctx.fillStyle = "#FF0090"
+                // ctx.fillRect(100, 0, 25, 50); //pr tester répartition
                 //on redessine l'image ds le canva
-                ctx.drawImage(patron,0,0)
+                // ctx.drawImage(patron,0,0)
                 // return true
                 resolve(true) 
             }else{
@@ -87,10 +95,10 @@
     document.addEventListener('readystatechange', (e)=>{
         if(document.readyState == "complete"){
             drawInCanva('canvaToCheck')
-            .then((res)=>{
+            // .then((res)=>{
                 console.log(getColorsDistributionFromCanvasId('canvaToCheck'))
-            })
-            .catch(err=>console.log(err.error))
+            // })
+            // .catch(err=>console.log(err.error))
         }
         
     })
